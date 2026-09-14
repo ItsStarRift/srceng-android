@@ -27,6 +27,8 @@ jobs:
           git clone --depth 1 --branch android https://github.com/ItsStarRift/source-engine srcsdk
           cd srcsdk
           git submodule update --init --recursive
+          rm -rf thirdparty/openal-soft
+          git clone --depth 1 https://github.com/kcat/openal-soft thirdparty/openal-soft
           cd ..
 
       - name: Build
