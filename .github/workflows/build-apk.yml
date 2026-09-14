@@ -1,0 +1,40 @@
+name: Build APK (StarRift)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ android-fixes ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make openjdk-8-jdk openjdk-8-jre ant-contrib python3-requests python3-pip
+          sudo pip3 install websocket-client
+
+      - name: Clone NDK and SDK
+        run: |
+          git clone --depth 1 https://gitlab.com/LostGamer/ndk-binaries
+          git clone --depth 1 https://gitlab.com/LostGamer/android-sdk
+
+      - name: Clone source-engine (as srcsdk)
+        run: |
+          git clone --depth 1 --branch android https://github.com/ItsStarRift/source-engine srcsdk
+          cd srcsdk
+          git submodule update --init --recursive
+          cd ..
+
+      - name: Build
+        run: |
+          DEPLOY_BRANCH=android-fixes COMMIT=$(git rev-parse HEAD) scripts/workflow.sh
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: srceng-debug-apk
+          path: bin/srceng-debug.apk
